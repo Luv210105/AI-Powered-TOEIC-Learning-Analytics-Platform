@@ -1,0 +1,80 @@
+# docker-compose.yml
+# Hạ tầng tối thiểu cho Phase 1: MinIO (object storage) + PostgreSQL.
+# Các service nặng hơn (Kafka, Spark, Flink, Airflow, DataHub) sẽ được thêm dần ở các phase sau.
+# Mọi thông tin nhạy cảm (user/password) lấy từ file .env — KHÔNG hardcode ở đây.
+
+services:
+  # ---------------------------------------------------------------------------
+  # MinIO — object storage tương thích S3, dùng làm data lake (landing + Delta).
+  # ---------------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: toeic-minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # API S3
+      - "9001:9001"   # Console web (giao diện trình duyệt)
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # createbuckets — chạy MỘT LẦN để tạo sẵn 4 bucket rồi tự thoát.
+  # Phụ thuộc vào minio đã healthy trước khi chạy.
+  # ---------------------------------------------------------------------------
+  createbuckets:
+    image: minio/mc:latest
+    container_name: toeic-createbuckets
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD};
+      mc mb --ignore-existing local/landing;
+      mc mb --ignore-existing local/bronze;
+      mc mb --ignore-existing local/silver;
+      mc mb --ignore-existing local/gold;
+      echo '>> Buckets landing/bronze/silver/gold đã sẵn sàng';
+      exit 0;
+      "
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — đóng 2 vai: (1) source DB mô phỏng department khác,
+  # (2) Gold warehouse cho BI ở các phase sau.
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16
+    container_name: toeic-postgres
+    ports:
+      - "5433:5432"   # host 5433 -> container 5432 (tránh đụng Postgres cài sẵn trên máy)
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+# -----------------------------------------------------------------------------
+# Named volumes — giữ dữ liệu không mất khi tắt/khởi động lại container.
+# -----------------------------------------------------------------------------
+volumes:
+  minio_data:
+  postgres_data:
