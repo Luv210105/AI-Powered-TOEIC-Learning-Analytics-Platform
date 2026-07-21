@@ -27,10 +27,11 @@ set +a
 # Phiên bản tương thích Spark 3.5.3 (Scala 2.12, Hadoop 3.3.4)
 DELTA_PKG="io.delta:delta-spark_2.12:3.2.0"
 HADOOP_AWS_PKG="org.apache.hadoop:hadoop-aws:3.3.4"
+POSTGRES_PKG="org.postgresql:postgresql:42.7.4"   # JDBC driver ghi Gold sang PostgreSQL
 
 docker compose exec -T spark-master /opt/spark/bin/spark-submit \
   --master spark://spark-master:7077 \
-  --packages "${DELTA_PKG},${HADOOP_AWS_PKG}" \
+  --packages "${DELTA_PKG},${HADOOP_AWS_PKG},${POSTGRES_PKG}" \
   --conf spark.jars.ivy=/tmp/.ivy2 \
   --conf spark.hadoop.fs.s3a.endpoint=http://minio:9000 \
   --conf spark.hadoop.fs.s3a.access.key="${MINIO_ROOT_USER}" \
@@ -40,4 +41,7 @@ docker compose exec -T spark-master /opt/spark/bin/spark-submit \
   --conf spark.hadoop.fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider \
   --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension \
   --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog \
+  --conf spark.pg.url="jdbc:postgresql://postgres:5432/${POSTGRES_DB}" \
+  --conf spark.pg.user="${POSTGRES_USER}" \
+  --conf spark.pg.password="${POSTGRES_PASSWORD}" \
   "/opt/spark-apps/${JOB}"
