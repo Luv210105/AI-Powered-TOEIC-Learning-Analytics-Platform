@@ -72,6 +72,44 @@ services:
       retries: 5
     restart: unless-stopped
 
+  # ---------------------------------------------------------------------------
+  # Spark master — điều phối cluster + Spark Master UI (cổng 8080).
+  # ---------------------------------------------------------------------------
+  spark-master:
+    image: apache/spark:3.5.3
+    container_name: toeic-spark-master
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+    ports:
+      - "8080:8080"   # Master UI
+      - "7077:7077"   # Master RPC (worker + submit kết nối vào đây)
+      - "4040:4040"   # Application UI (khi chạy job — nơi xem stage/task/skew)
+    volumes:
+      - ./processing/spark:/opt/spark-apps   # code Spark job
+      - ./data:/data                          # (dự phòng) truy cập data local nếu cần
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Spark worker — nơi thực thi task. Kết nối tới master qua service name.
+  # ---------------------------------------------------------------------------
+  spark-worker:
+    image: apache/spark:3.5.3
+    container_name: toeic-spark-worker
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2G
+    ports:
+      - "8081:8081"   # Worker UI
+    volumes:
+      - ./processing/spark:/opt/spark-apps
+      - ./data:/data
+    restart: unless-stopped
+
 # -----------------------------------------------------------------------------
 # Named volumes — giữ dữ liệu không mất khi tắt/khởi động lại container.
 # -----------------------------------------------------------------------------
