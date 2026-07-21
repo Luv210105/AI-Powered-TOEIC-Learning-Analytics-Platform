@@ -193,3 +193,30 @@ sớm (ngay Silver) để các tầng sau nhẹ hơn.
 ### Bằng chứng
 ![Duplicate before/after](images/phase5/duplicate.png)
 *Dòng trùng: 46,050 → 0 sau dropDuplicates theo (attempt_id, question_id).*
+
+---
+
+## 5. Validate stage (DP1)
+
+Job: [`processing/spark/validate_bronze.py`](../processing/spark/validate_bronze.py)
+
+DP1 gồm **2 stage**: **ingest** ([`ingest_bronze.py`](../processing/spark/ingest_bronze.py)) và
+**validate** (job này). Validate chạy các data quality check trên Bronze, in PASS/FAIL, và **thoát
+với exit code ≠ 0 nếu có FAIL** → để Airflow (Phase 9) bắt lỗi và dừng pipeline.
+
+### Các check (12 check, 4 nhóm)
+
+| Nhóm | Nội dung |
+|------|----------|
+| **Schema** | mỗi bảng Bronze có đủ metadata `ingest_ts`, `source`, `batch_id` |
+| **Row count** | `raw_attempt_answers` không rỗng; `raw_users` = 5,000; `raw_questions` = 8,000 |
+| **Null** | key `answer_id`, `attempt_id`, `user_id` không NULL |
+| **Uniqueness** | khóa kỹ thuật `answer_id` / `user_id` / `question_id` duy nhất |
+
+> Bronze là RAW nên **KHÔNG** kiểm uniqueness business key `(attempt_id, question_id)` — 2%
+> duplicate là cố ý, sẽ dedup ở Silver (Phase 6).
+
+### Kết quả: **12/12 PASS**
+
+![Validate Bronze](images/phase5/validate-bronze.png)
+*DP1 validate stage: 12/12 check PASS, exit code 0.*
