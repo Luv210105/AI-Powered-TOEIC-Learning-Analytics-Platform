@@ -194,6 +194,19 @@ erDiagram
 | **Range** | `total_score` ∈ [10, 990]; `difficulty` ∈ [0, 1]; `part` ∈ [1, 7] |
 | **SLA** | Gold freshness ≤ 30 phút; feature freshness 5–60 phút |
 
+### Thực thi — validate stage của pipeline
+
+Các check trên được cài đặt thành **validate stage** cho mỗi pipeline (chạy sau ingest, thoát
+exit code ≠ 0 nếu FAIL để Airflow bắt lỗi):
+
+| Pipeline | Job validate | Kết quả |
+|----------|--------------|---------|
+| **DP1** (Bronze) | [`processing/spark/validate_bronze.py`](../processing/spark/validate_bronze.py) | 12/12 PASS ([ảnh](images/phase5/validate-bronze.png)) |
+| **DP2** (Gold) | [`processing/validate_gold.py`](../processing/validate_gold.py) | 11/11 PASS (referential + SCD2 integrity) |
+
+![Validate Gold](images/phase6/validate-gold.png)
+*DP2 validate stage: 11/11 check PASS — row count, referential (fact→dim), SCD2 integrity, null/range, uniqueness.*
+
 ---
 
 ## 11. Chiến lược SCD2 cho `dim_user`
