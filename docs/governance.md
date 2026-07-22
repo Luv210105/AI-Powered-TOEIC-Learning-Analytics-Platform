@@ -1,8 +1,7 @@
 # Data Governance — DataHub (Phase 10)
 
 Governance cho lakehouse TOEIC bằng **DataHub**: metadata catalog + **lineage** (dữ liệu chảy từ
-đâu đến đâu) + **data contract** (assertion chất lượng). Xem thiết kế ở
-[project_proposal.md §12](../project_proposal.md).
+đâu đến đâu) + **data contract** (assertion chất lượng).
 
 - DataHub UI: `http://localhost:9002` (login `datahub`/`datahub`), GMS: `http://localhost:8085`
 - Recipe/script: [`governance/datahub/`](../governance/datahub/)

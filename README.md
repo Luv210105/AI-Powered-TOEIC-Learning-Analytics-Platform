@@ -54,8 +54,6 @@ Sơ đồ deployment đầy đủ (12 luồng dữ liệu đánh số, deployabl
 ├── pipelines/airflow/dags/       # 3 DAG (dp1/dp2/dp3) + common.py (helper)
 ├── governance/datahub/           # DataHub: recipes ingest, lineage.yml, emit_assertion.py, start script
 ├── docs/                         # Tài liệu + ảnh bằng chứng (docs/images/phaseN/)
-├── project_proposal.md           # thiết kế tổng quan + rubric coverage
-├── process.md                    # lộ trình 12 phase
 └── pyproject.toml / uv.lock      # môi trường Python (uv)
 ```
 
@@ -119,4 +117,4 @@ bash governance/datahub/start_datahub.sh             # UI localhost:9002
 ```
 
 > UI: MinIO `:9001` · Spark `:8080` · Flink `:8082` · Airflow `:8083` · DataHub `:9002`.
-> Chi tiết Docker + tối ưu image: Phase 12 (xem [process.md](process.md)).
+> Chi tiết Docker + tối ưu image (multistage, −70%): [docs/novel_ideas.md](docs/novel_ideas.md).

@@ -1,7 +1,7 @@
 # Rubric Coverage Map (tự chấm)
 
-Đối chiếu từng hạng mục rubric mini-coursework ([project_proposal.md §17](../project_proposal.md)) với
-deliverable + bằng chứng đã có. Tất cả ✅ = có code/doc/ảnh minh chứng.
+Đối chiếu từng hạng mục rubric mini-coursework với deliverable + bằng chứng đã có.
+Tất cả ✅ = có code/doc/ảnh minh chứng.
 
 | # | Hạng mục rubric | Điểm | Deliverable | Bằng chứng | ✅ |
 |---|-----------------|:----:|-------------|-----------|:--:|

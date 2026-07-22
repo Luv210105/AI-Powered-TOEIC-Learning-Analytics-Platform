@@ -1,8 +1,7 @@
 # Data Generator — Offline (Section 01)
 
 Tài liệu mô tả **offline data generator** sinh dữ liệu luyện thi TOEIC dạng Parquet,
-có **cố tình cài 4 lỗi dữ liệu** để các phase Spark xử lý. Xem tổng quan ở
-[project_proposal.md §7](../project_proposal.md).
+có **cố tình cài 4 lỗi dữ liệu** để các phase Spark xử lý.
 
 ## 1. Tổng quan
 - Code: [`generator/offline_generator.py`](../generator/offline_generator.py)

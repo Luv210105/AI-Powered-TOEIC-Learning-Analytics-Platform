@@ -1,6 +1,6 @@
 # Novel Ideas
 
-Hai ý tưởng ngoài chương trình EDAI, có document + proof. Xem [project_proposal.md §15](../project_proposal.md).
+Hai ý tưởng ngoài chương trình đào tạo, có document + proof.
 
 ---
 
@@ -32,7 +32,7 @@ docker images toeic-app     # naive 2.18GB vs optimized 651MB
 ```
 
 ### Vì sao "novel"
-`uv` (2024+) chưa nằm trong chương trình EDAI (vốn dùng pip/venv); kết hợp multistage + `--frozen` cho
+`uv` (2024+) chưa nằm trong chương trình đào tạo (vốn dùng pip/venv); kết hợp multistage + `--frozen` cho
 build **nhanh, nhỏ, reproducible** — thực hành DevOps/MLOps hiện đại.
 
 ---
@@ -63,4 +63,4 @@ bug broker DNS, CLI cũ không nhận ra compose v5.x. Không liên quan RAM/pip
 
 ### Vì sao "novel"
 Đây là **problem-solving thực tế**: chẩn đoán tầng sâu (Compose version, image packaging, service naming,
-port) và tự dựng lại quy trình deploy khi công cụ chính thức hỏng — kỹ năng vận hành ngoài chương trình EDAI.
+port) và tự dựng lại quy trình deploy khi công cụ chính thức hỏng — kỹ năng vận hành ngoài chương trình đào tạo.

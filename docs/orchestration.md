@@ -1,7 +1,7 @@
 # Orchestration — Airflow (Phase 9 / DP1-DP2-DP3)
 
 Gói 3 pipeline (DP1/DP2/DP3) thành DAG Airflow, mỗi DAG có **2 stage: ingest → validate**, chạy
-theo lịch `@daily`, có retry + backoff. Xem thiết kế ở [project_proposal.md §11](../project_proposal.md).
+theo lịch `@daily`, có retry + backoff.
 
 - DAGs: [`pipelines/airflow/dags/`](../pipelines/airflow/dags/) (`dp1_ingest_bronze.py`,
   `dp2_silver_gold.py`, `dp3_feature_offline.py`, `common.py`)

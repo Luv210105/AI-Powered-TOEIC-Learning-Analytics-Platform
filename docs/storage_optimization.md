@@ -2,7 +2,6 @@
 
 Tối ưu lưu trữ ở 2 tầng: **lakehouse** (Delta trên MinIO) và **warehouse** (PostgreSQL Gold).
 Mỗi phần theo format: **Workload → Bottleneck → Optimization → Result → Trade-off**.
-Xem thiết kế ở [project_proposal.md §10](../project_proposal.md).
 
 ---
 

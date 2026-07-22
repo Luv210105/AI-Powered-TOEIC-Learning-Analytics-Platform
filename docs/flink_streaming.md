@@ -1,7 +1,6 @@
 # Flink Streaming — xử lý lỗi streaming (Phase 7)
 
-Xử lý luồng sự kiện học viên real-time: **Kafka → Flink → Bronze**. Xem thiết kế ở
-[project_proposal.md §7.3-7.4, §9.2](../project_proposal.md).
+Xử lý luồng sự kiện học viên real-time: **Kafka → Flink → Bronze**.
 
 ```
 stream_generator.py ──event JSON──► Kafka (toeic.events) ──► Flink ──► Bronze (MinIO)

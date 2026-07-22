@@ -1,7 +1,7 @@
 # Schema Design — Bronze / Silver / Gold (Section 02)
 
 Tài liệu thiết kế schema cho lakehouse TOEIC, làm **trước khi** build pipeline Spark
-(Phase 5–6). Xem tổng quan ở [project_proposal.md §8](../project_proposal.md).
+(Phase 5–6).
 
 ```
 Source (MinIO landing + Postgres) → Bronze (raw_) → Silver (stg_) → Gold (dim_/fact_/obt_/feat_)

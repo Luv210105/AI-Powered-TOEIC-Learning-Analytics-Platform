@@ -2,7 +2,7 @@
 
 Sơ đồ triển khai chi tiết của AI-Powered TOEIC Learning Analytics Platform. Mỗi node là một
 **deployable unit** (service chạy được bằng Docker); mũi tên đi theo **luồng dữ liệu**, có đánh số +
-mô tả. Mở rộng từ [project_proposal.md §5](../project_proposal.md).
+mô tả.
 
 ---
 
@@ -80,7 +80,7 @@ Chi tiết: [orchestration.md](orchestration.md).
 ```
 dev viết code -> git commit -> docker compose build/up -> chạy job (Spark/Flink) + Airflow DAG
 ```
-- Dev đẩy code, dùng `docker compose up` dựng toàn bộ stack local (xem [§13 proposal](../project_proposal.md)).
+- Dev đẩy code, dùng `docker compose up` dựng toàn bộ stack local.
 - **DataHub chạy stack Docker RIÊNG** (không trong `docker-compose.yml`) — đúng chuẩn production
   (governance là platform cross-cutting). Xem [governance.md](governance.md).
 

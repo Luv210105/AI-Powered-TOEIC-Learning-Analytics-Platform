@@ -2,7 +2,6 @@
 
 Tài liệu ghi quy trình **baseline → quan sát Spark UI → tối ưu → đo lại** cho từng lỗi dữ liệu
 offline. Mỗi lỗi trình bày theo format: **Workload → Bottleneck → Optimization → Result → Trade-off**.
-Xem thiết kế ở [project_proposal.md §9.1](../project_proposal.md).
 
 - Job ingest raw → Bronze: [`processing/spark/ingest_bronze.py`](../processing/spark/ingest_bronze.py)
 - Submit qua wrapper: `bash processing/spark/submit.sh <job.py>`
