@@ -1,0 +1,10 @@
+# Giảm build context + image size — loại thứ không cần vào image app.
+.git
+.venv
+__pycache__/
+*.pyc
+data/
+docs/images/
+*.parquet
+.env
+scratchpad/

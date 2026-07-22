@@ -1,0 +1,10 @@
+# Dockerfile.app.naive — bản CHƯA tối ưu, để so sánh image size với Dockerfile.app.
+# Single-stage + base ĐẦY ĐỦ (python:3.14, không slim) + cài mọi deps + giữ cả uv/build layer.
+FROM python:3.14
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-install-project   # gồm cả dev deps, base đầy đủ
+ENV PATH="/app/.venv/bin:$PATH"
+COPY . .
+CMD ["python", "main.py"]

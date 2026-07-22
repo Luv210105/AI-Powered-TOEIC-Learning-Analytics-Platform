@@ -1,0 +1,33 @@
+# postgres_gold_recipe.yml — DataHub ingestion: crawl bảng Gold từ PostgreSQL -> DataHub.
+#
+# Chạy: export $(grep -v '^#' .env | xargs) && \
+#       PATH="$HOME/.local/bin:$PATH" datahub ingest -c governance/datahub/postgres_gold_recipe.yml
+#
+# CLI chạy ở HOST -> Postgres qua localhost:5433, đẩy metadata vào GMS localhost:8085.
+
+source:
+  type: postgres
+  config:
+    host_port: "localhost:5433"
+    database: toeic
+    username: "${POSTGRES_USER}"
+    password: "${POSTGRES_PASSWORD}"
+    include_tables: true
+    include_views: false
+    # chỉ lấy bảng Gold (dim/fact/obt/feat), bỏ qua src_* và bảng khác
+    schema_pattern:
+      allow:
+        - "public"
+    table_pattern:
+      allow:
+        - ".*\\.dim_.*"
+        - ".*\\.fact_.*"
+        - ".*\\.obt_.*"
+        - ".*\\.feat_.*"
+    profiling:
+      enabled: false
+
+sink:
+  type: datahub-rest
+  config:
+    server: "http://localhost:8085"

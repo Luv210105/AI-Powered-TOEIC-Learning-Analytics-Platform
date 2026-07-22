@@ -1,0 +1,18 @@
+[project]
+name = "ai-powered-toeic-learning-analytics-platform"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "boto3>=1.43.51",
+    "confluent-kafka>=2.15.0",
+    "numpy>=2.5.1",
+    "pandas>=3.0.3",
+    "psycopg2-binary>=2.9.12",
+    "psycopg[binary]>=3.3.4",
+    "pyarrow>=25.0.0",
+    "python-dotenv>=1.2.2",
+    "pyyaml>=6.0.3",
+    "sqlalchemy>=2.0.51",
+]

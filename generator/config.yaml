@@ -1,0 +1,55 @@
+# generator/config.yaml
+# Bảng điều khiển cho Data Generator (Phase 2 = offline; phần streaming để Phase 7).
+# Mọi tham số sinh dữ liệu + tỷ lệ lỗi đều khai báo ở đây, KHÔNG hardcode trong code.
+
+# ---------------------------------------------------------------------------
+# Chung
+# ---------------------------------------------------------------------------
+random_seed: 42            # cố định để chạy lại ra kết quả y hệt (reproducible)
+output_dir: "data/offline" # nơi ghi Parquet (thư mục này đã bị .gitignore chặn)
+
+# ---------------------------------------------------------------------------
+# Quy mô dữ liệu — BẮT ĐẦU NHỎ để chạy nhanh trên laptop, tăng dần sau.
+# ---------------------------------------------------------------------------
+n_users: 5000             # số học viên
+n_questions: 8000         # ngân hàng câu hỏi
+n_vocabulary: 3000        # số từ vựng
+n_grammar_topics: 100     # số chủ đề ngữ pháp
+n_mock_tests: 30          # số bộ đề
+days_history: 180         # số ngày lịch sử (dữ liệu trải trong 180 ngày)
+
+# Hành vi làm bài (điều khiển số dòng bảng giao dịch)
+avg_attempts_per_user: 8  # trung bình mỗi học viên làm 8 lượt thi
+questions_per_attempt: 50 # mỗi lượt trả lời 50 câu (đề luyện rút gọn, không phải full 200)
+
+# ---------------------------------------------------------------------------
+# Cơ chế sinh điểm: P(đúng) = sigmoid(base_ability - difficulty + noise)
+# base_ability tăng dần theo thời gian -> tạo "tín hiệu học tập"
+# ---------------------------------------------------------------------------
+ability_start_mean: -0.3  # năng lực trung bình lúc mới bắt đầu
+ability_growth: 0.6       # mức tăng năng lực qua toàn bộ 180 ngày
+noise_std: 0.4            # độ nhiễu ngẫu nhiên mỗi câu
+
+# ---------------------------------------------------------------------------
+# 4 LỖI OFFLINE CỐ TÌNH CÀI (rubric chấm - phải đo được)
+# ---------------------------------------------------------------------------
+# 1) Skew: dồn mục tiêu 600-700 + câu Part 5 chiếm tỷ trọng lớn
+skew_target_score_band: 0.80   # ~80% học viên mục tiêu 600-700
+skew_part5_ratio: 0.35         # ~35% câu hỏi rơi vào Part 5
+
+# 2) High cardinality: các ID gần như duy nhất -> tự nhiên có, chỉ cần kiểm chứng
+
+# 3) Schema evolution: partition TRƯỚC ngày này thiếu 2 cột tag_grammar + difficulty
+schema_change_date: "2025-09-01"
+
+# 4) Duplicate: nhân đôi ~2% dòng trong attempt_answers (cùng attempt_id + question_id)
+duplicate_rate_offline: 0.02
+
+# ---------------------------------------------------------------------------
+# THAM SỐ STREAMING (chưa dùng ở Phase 2 — để sẵn cho Phase 7)
+# ---------------------------------------------------------------------------
+base_events_per_min: 100
+burst_windows: ["19:00-22:00"]
+exam_proximity_burst_days: 14
+late_arrival_rate: 0.12
+duplicate_rate_stream: 0.015

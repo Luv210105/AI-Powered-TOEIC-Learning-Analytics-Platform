@@ -1,0 +1,24 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Secrets & môi trường — KHÔNG commit giá trị thật, chỉ commit .env.example
+.env
+.env.*
+!.env.example
+
+# Dữ liệu sinh ra / output cục bộ (Parquet, Delta...) — không đưa lên Git
+data/
+*.parquet
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
