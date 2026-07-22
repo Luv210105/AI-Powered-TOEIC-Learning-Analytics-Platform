@@ -1,0 +1,11 @@
+# lineage_recipe.yml — ingest lineage.yml vào DataHub.
+# Chạy: PATH="$HOME/.local/bin:$PATH" datahub ingest -c governance/datahub/lineage_recipe.yml
+source:
+  type: datahub-lineage-file
+  config:
+    file: governance/datahub/lineage.yml
+    preserve_upstream: false
+sink:
+  type: datahub-rest
+  config:
+    server: "http://localhost:8085"

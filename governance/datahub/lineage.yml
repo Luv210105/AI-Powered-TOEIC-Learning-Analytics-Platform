@@ -1,0 +1,41 @@
+# lineage.yml — lineage pipeline TOEIC: landing (MinIO) -> Bronze -> Silver -> Gold -> Feature.
+# Ingest qua source datahub-lineage-file (xem lineage_recipe.yml).
+# Bronze/Silver trên MinIO (platform s3), Gold/Feature trên Postgres.
+version: 1
+lineage:
+  # --- Chuỗi USER: landing -> raw -> stg -> dim_user ---
+  - entity: {platform: s3, name: "bronze/raw_users", env: PROD, type: dataset}
+    upstream:
+      - entity: {platform: s3, name: "landing/users", env: PROD, type: dataset}
+  - entity: {platform: s3, name: "silver/stg_users", env: PROD, type: dataset}
+    upstream:
+      - entity: {platform: s3, name: "bronze/raw_users", env: PROD, type: dataset}
+  - entity: {platform: postgres, name: "toeic.public.dim_user", env: PROD, type: dataset}
+    upstream:
+      - entity: {platform: s3, name: "silver/stg_users", env: PROD, type: dataset}
+
+  # --- Chuỗi ATTEMPT_ANSWERS: landing -> raw -> stg ---
+  - entity: {platform: s3, name: "bronze/raw_attempt_answers", env: PROD, type: dataset}
+    upstream:
+      - entity: {platform: s3, name: "landing/attempt_answers", env: PROD, type: dataset}
+  - entity: {platform: s3, name: "silver/stg_attempt_answers", env: PROD, type: dataset}
+    upstream:
+      - entity: {platform: s3, name: "bronze/raw_attempt_answers", env: PROD, type: dataset}
+
+  # --- Chuỗi QUESTIONS -> dim_question ---
+  - entity: {platform: postgres, name: "toeic.public.dim_question", env: PROD, type: dataset}
+    upstream:
+      - entity: {platform: s3, name: "silver/stg_questions", env: PROD, type: dataset}
+
+  # --- FACT: gộp từ Silver + Dim ---
+  - entity: {platform: postgres, name: "toeic.public.fact_question_attempt", env: PROD, type: dataset}
+    upstream:
+      - entity: {platform: s3, name: "silver/stg_attempt_answers", env: PROD, type: dataset}
+      - entity: {platform: postgres, name: "toeic.public.dim_user", env: PROD, type: dataset}
+      - entity: {platform: postgres, name: "toeic.public.dim_question", env: PROD, type: dataset}
+
+  # --- FEATURE: point-in-time từ Silver ---
+  - entity: {platform: postgres, name: "toeic.public.feat_user_90d", env: PROD, type: dataset}
+    upstream:
+      - entity: {platform: s3, name: "silver/stg_attempt_answers", env: PROD, type: dataset}
+      - entity: {platform: s3, name: "silver/stg_test_attempts", env: PROD, type: dataset}
