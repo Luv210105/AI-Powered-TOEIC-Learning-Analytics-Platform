@@ -8,6 +8,11 @@ mô tả.
 
 ## 1. Deployment diagram (data flow)
 
+![Data flow diagram](images/architecture_dataflow.svg)
+
+<details>
+<summary>Bản text (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     GEN["Data Generator<br/>(Python)"]
@@ -38,6 +43,8 @@ flowchart LR
     PG -- "11: table metadata (ingest)" --> DATAHUB
     MINIO -- "12: dataset lineage" --> DATAHUB
 ```
+
+</details>
 
 ### Mô tả luồng dữ liệu
 
