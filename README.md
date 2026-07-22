@@ -4,19 +4,49 @@ Data platform end-to-end cho domain luyện thi **TOEIC**, minh hoạ trọn vò
 sinh dữ liệu (offline + streaming) → ingest & xử lý (Spark/Flink) → lakehouse **Bronze → Silver → Gold**
 → feature store → orchestration (Airflow) → governance (DataHub).
 
-> Mini-coursework chấm **100% Data Engineering** (Section 01 + 02). Domain TOEIC là "cái cớ" để có dữ
-> liệu thật; trọng tâm là **cố tình tạo lỗi dữ liệu rồi xử lý có bằng chứng**. Final phase mở rộng ML/LLM.
-
 ---
 
 ## Table of Contents
 
-1. [Kiến trúc](#kiến-trúc)
-2. [Repo Structure](#repo-structure)
-3. [Tech stack](#tech-stack)
-4. [Data pipelines](#data-pipelines)
-5. [Tài liệu chi tiết](#tài-liệu-chi-tiết-docs)
-6. [Run instructions](#run-instructions)
+1. [Bối cảnh & Mục tiêu](#bối-cảnh--mục-tiêu)
+2. [Kiến trúc](#kiến-trúc)
+3. [Repo Structure](#repo-structure)
+4. [Tech stack](#tech-stack)
+5. [Data pipelines](#data-pipelines)
+6. [Tài liệu chi tiết](#tài-liệu-chi-tiết-docs)
+7. [Run instructions](#run-instructions)
+
+---
+
+## Bối cảnh & Mục tiêu
+
+### Bài toán
+Một nền tảng luyện thi **TOEIC** có hàng chục nghìn học viên làm bài luyện tập và thi thử mỗi ngày.
+Dữ liệu học tập phát sinh từ **nhiều nguồn, nhiều dạng**:
+
+- **Batch (offline):** kết quả bài làm, ngân hàng câu hỏi, hồ sơ học viên… được export định kỳ dạng file.
+- **Streaming (realtime):** sự kiện tương tác của học viên (bắt đầu/nộp bài, trả lời từng câu…) bắn liên tục.
+- **OLTP nguồn:** bảng người dùng/câu hỏi nằm ở database của một hệ thống khác (mô phỏng "department khác").
+
+Dữ liệu thô này **bẩn và rời rạc** — lệch phân phối (skew), trùng lặp, schema thay đổi theo thời gian,
+sự kiện đến trễ / sai thứ tự — nên **không thể dùng trực tiếp** cho phân tích hay huấn luyện mô hình.
+
+### Mục tiêu
+Xây một **data platform end-to-end** biến dữ liệu học tập thô thành dữ liệu **sạch, có cấu trúc,
+sẵn sàng cho phân tích & ML**: dashboard theo dõi tiến bộ học viên và feature cho mô hình dự đoán
+điểm / gợi ý luyện tập.
+
+### Vì sao làm theo hướng này (trọng tâm Data Engineering)
+Giá trị kỹ thuật của project **không nằm ở mô hình AI cuối**, mà ở việc dựng đúng **vòng đời dữ liệu**:
+
+- Kiến trúc **medallion** Bronze → Silver → Gold: tách rõ dữ liệu raw / đã-làm-sạch / sẵn-sàng-dùng.
+- **Cố tình tạo lỗi dữ liệu thật** (offline + streaming) rồi **xử lý có bằng chứng đo được** —
+  đây là kỹ năng cốt lõi của Data Engineering, không phải "dữ liệu đẹp cho sẵn".
+- Vận hành như production: batch (**Spark**) + streaming (**Flink**), điều phối (**Airflow**),
+  tối ưu lưu trữ, và **governance** (lineage + data contract, **DataHub**).
+
+> Domain TOEIC đóng vai trò "cái cớ" để có **dữ liệu thật với đặc tính đa dạng**. Phần mở rộng ML/LLM ở
+> phase cuối chỉ để minh hoạ rằng dữ liệu tầng Gold **dùng được ngay** cho hạ nguồn.
 
 ---
 
