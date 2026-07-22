@@ -13,3 +13,7 @@ RUN pip3 install --no-cache-dir apache-flink==1.18.1
 # Kafka connector cho Flink 1.18 (đặt vào /opt/flink/lib để job dùng được)
 RUN wget -P /opt/flink/lib/ \
     https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.2.0-1.18/flink-sql-connector-kafka-3.2.0-1.18.jar
+
+# Bật S3 plugin (ghi ra MinIO qua s3a://) — copy jar có sẵn vào thư mục plugins
+RUN mkdir -p /opt/flink/plugins/s3-fs-hadoop && \
+    cp /opt/flink/opt/flink-s3-fs-hadoop-1.18.1.jar /opt/flink/plugins/s3-fs-hadoop/

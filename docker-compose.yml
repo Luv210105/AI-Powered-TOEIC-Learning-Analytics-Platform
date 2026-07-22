@@ -150,6 +150,10 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-jobmanager
+        s3.endpoint: http://minio:9000
+        s3.path.style.access: true
+        s3.access-key: ${MINIO_ROOT_USER}
+        s3.secret-key: ${MINIO_ROOT_PASSWORD}
     volumes:
       - ./processing/flink:/opt/flink/jobs
     restart: unless-stopped
@@ -168,6 +172,10 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-jobmanager
         taskmanager.numberOfTaskSlots: 2
+        s3.endpoint: http://minio:9000
+        s3.path.style.access: true
+        s3.access-key: ${MINIO_ROOT_USER}
+        s3.secret-key: ${MINIO_ROOT_PASSWORD}
     volumes:
       - ./processing/flink:/opt/flink/jobs
     restart: unless-stopped
