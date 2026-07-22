@@ -127,6 +127,23 @@ avg_accuracy, accuracy_part1..7, avg_total_score, last_activity_ts`.
 timestamp của label → tránh data leakage. Rolling 90 ngày phải tính **tại từng mốc thời gian**,
 không tính một lần cho toàn lịch sử.
 
+### Thực thi (DP3)
+
+Job [`processing/spark/feature_offline.py`](../processing/spark/feature_offline.py) tính
+`feat_user_90d` bằng **range join point-in-time**: mỗi lần thi thử là 1 mốc; tại mỗi mốc tính
+đặc trưng rolling 90 ngày với answer có `ans_date < ref_date` (TRƯỚC mốc, không gồm chính nó).
+Kết quả **34,132 dòng** (mốc đầu của mỗi user không có 90 ngày lịch sử → bị loại). Validate:
+[`processing/validate_features.py`](../processing/validate_features.py) — **9/9 PASS**.
+
+Bằng chứng rolling window (user 10): số câu tăng dần 50 → 100 → … → 300 rồi **ổn định** khi dữ
+liệu cũ > 90 ngày rơi khỏi cửa sổ → đúng point-in-time (không dùng dữ liệu tương lai).
+
+![feat_user_90d](images/phase8/feat-user-90d.png)
+*feat_user_90d: mỗi dòng có event_timestamp + created_ts; rolling 90 ngày tại từng mốc thi.*
+
+![Validate features](images/phase8/validate-features.png)
+*DP3 validate stage: 9/9 check PASS (null 2 timestamp, uniqueness, range, referential).*
+
 ---
 
 ## 9. ERD — quan hệ dim–fact (star schema)
