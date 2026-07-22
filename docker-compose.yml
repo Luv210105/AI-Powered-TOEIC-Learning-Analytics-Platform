@@ -180,6 +180,41 @@ services:
       - ./processing/flink:/opt/flink/jobs
     restart: unless-stopped
 
+  # ---------------------------------------------------------------------------
+  # Airflow (standalone) — orchestrate DP1/DP2/DP3. Trigger job qua docker exec.
+  # ---------------------------------------------------------------------------
+  airflow:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.airflow
+    image: toeic-airflow:2.10
+    container_name: toeic-airflow
+    command: standalone
+    group_add:
+      - "973"          # GID group docker -> Airflow truy cập /var/run/docker.sock
+    ports:
+      - "8083:8080"    # Airflow UI (host 8083 — tránh 8080 của Spark master)
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      # connections & variables (hiện trong Airflow UI)
+      AIRFLOW_CONN_POSTGRES_GOLD: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      AIRFLOW_VAR_SPARK_MASTER: "spark://spark-master:7077"
+      AIRFLOW_VAR_MINIO_ENDPOINT: "http://minio:9000"
+      # cho validate scripts (chạy trong Airflow) nối Postgres nội bộ
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - ./pipelines/airflow/dags:/opt/airflow/dags
+      - ./processing:/opt/airflow/repo/processing
+      - ./generator:/opt/airflow/repo/generator
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
 # -----------------------------------------------------------------------------
 # Named volumes — giữ dữ liệu không mất khi tắt/khởi động lại container.
 # -----------------------------------------------------------------------------

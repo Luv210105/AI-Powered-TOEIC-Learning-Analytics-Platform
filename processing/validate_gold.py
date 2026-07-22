@@ -26,9 +26,11 @@ def check(name: str, passed: bool, detail: str = "") -> None:
 
 def main() -> None:
     """Chạy toàn bộ data quality check trên Gold."""
+    host = os.getenv("POSTGRES_HOST", "localhost")   # 'postgres' khi chạy trong Airflow
+    port = os.getenv("POSTGRES_PORT", "5433")        # '5432' khi chạy nội bộ compose
     eng = create_engine(
-        f"postgresql+psycopg://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}"
-        f"@localhost:5433/{os.environ['POSTGRES_DB']}"
+        f"postgresql+psycopg2://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}"
+        f"@{host}:{port}/{os.environ['POSTGRES_DB']}"
     )
     with eng.connect() as c:
         def scalar(q: str):

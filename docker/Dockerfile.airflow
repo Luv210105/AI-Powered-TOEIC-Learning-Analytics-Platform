@@ -1,0 +1,11 @@
+# Dockerfile.airflow — Airflow + docker CLI (exec vào spark-master) + deps cho validate scripts.
+FROM apache/airflow:2.10.3
+
+# docker CLI để BashOperator chạy `docker exec toeic-spark-master spark-submit ...`
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends docker.io \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# deps cho validate scripts (psycopg2 hoạt động với SQLAlchemy 1.4 của Airflow)
+USER airflow
+RUN pip install --no-cache-dir psycopg2-binary python-dotenv pyyaml
