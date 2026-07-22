@@ -94,7 +94,8 @@ Sơ đồ deployment đầy đủ (12 luồng dữ liệu đánh số, deployabl
 | [storage_optimization.md](docs/storage_optimization.md) | Compaction/Z-ORDER (lakehouse) + index (warehouse) |
 | [orchestration.md](docs/orchestration.md) | Airflow: 3 DAG DP1/DP2/DP3, connections/variables |
 | [governance.md](docs/governance.md) | DataHub: metadata + lineage + data contract |
-| [novel_ideas.md](docs/novel_ideas.md) | Novel ideas + proof (Phase 12) |
+| [novel_ideas.md](docs/novel_ideas.md) | Novel ideas + proof: `uv`/multistage (image −70%) + DataHub bypass |
+| [rubric_coverage.md](docs/rubric_coverage.md) | Rubric Coverage Map (tự chấm 11 hạng mục) |
 
 ## Run instructions
 
