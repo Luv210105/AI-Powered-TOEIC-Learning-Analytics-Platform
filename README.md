@@ -1,30 +1,121 @@
 # AI-Powered TOEIC Learning Analytics Platform
 
-> **Trạng thái:** Nháp (Phase 0) — README sẽ được hoàn thiện đầy đủ ở Phase 11 (diagram, repo structure, docstring...). Xem lộ trình chi tiết ở [process.md](process.md) và thiết kế tổng quan ở [project_proposal.md](project_proposal.md).
+Data platform end-to-end cho domain luyện thi **TOEIC**, minh hoạ trọn vòng đời **Data Engineering**:
+sinh dữ liệu (offline + streaming) → ingest & xử lý (Spark/Flink) → lakehouse **Bronze → Silver → Gold**
+→ feature store → orchestration (Airflow) → governance (DataHub).
 
-## Giới thiệu
+> Mini-coursework chấm **100% Data Engineering** (Section 01 + 02). Domain TOEIC là "cái cớ" để có dữ
+> liệu thật; trọng tâm là **cố tình tạo lỗi dữ liệu rồi xử lý có bằng chứng**. Final phase mở rộng ML/LLM.
 
-Nhiều sinh viên cần chứng chỉ TOEIC để tốt nghiệp hoặc ứng tuyển việc làm, nhưng phần lớn nền tảng luyện thi hiện nay chỉ cung cấp tài liệu và đề luyện, chưa khai thác dữ liệu học tập để cá nhân hóa lộ trình.
+---
 
-Project này xây dựng một **Data Platform** cho domain TOEIC: sinh dữ liệu luyện thi (offline + streaming), ingest và xử lý qua Spark/Flink, lưu trữ theo mô hình lakehouse Bronze → Silver → Gold, orchestrate bằng Airflow, và quản trị dữ liệu bằng DataHub. Mini-coursework tập trung 100% vào Data Engineering (Section 01 + 02); final coursework sẽ mở rộng sang ML (dự đoán điểm TOEIC) và LLM (AI Tutor).
+## Table of Contents
 
-## Mục lục
+1. [Kiến trúc](#kiến-trúc)
+2. [Repo Structure](#repo-structure)
+3. [Tech stack](#tech-stack)
+4. [Data pipelines](#data-pipelines)
+5. [Tài liệu chi tiết](#tài-liệu-chi-tiết-docs)
+6. [Run instructions](#run-instructions)
 
-- [project_proposal.md](project_proposal.md) — Project Proposal: bối cảnh, mục tiêu, tech stack, deployment diagram, repository structure, thiết kế schema, pipeline, rubric coverage map.
-- [process.md](process.md) — Process Guide: lộ trình thực hiện chi tiết theo từng phase.
-- `docs/` — tài liệu chi tiết cho từng phần (sẽ bổ sung dần qua các phase):
-  - `architecture.md` — deployment diagram chi tiết
-  - `data_generator.md` — Section 01 write-up
-  - `schema_design.md` — Section 02: SCD2, ERD, naming convention
-  - `spark_optimization.md` — baseline → optimize + Spark UI
-  - `flink_streaming.md` — windowing + Flink UI
-  - `storage_optimization.md` — compaction/Z-order/indexing
-  - `governance.md` — DataHub lineage + data contract
-  - `novel_ideas.md` — novel ideas + proof
+---
 
-## Run instructions (sẽ hoàn thiện ở Phase 12)
+## Kiến trúc
+
+```
+Generator ─┬─► MinIO (landing)  ─┐
+           ├─► PostgreSQL (source)├─► Spark (batch) ─► Bronze→Silver→Gold (Delta/MinIO + Postgres)
+           └─► Kafka (events) ───┴─► Flink (stream) ─► Bronze stream
+                                          Airflow orchestrate DP1/DP2/DP3
+                                          DataHub governance (lineage + contract)
+```
+
+Sơ đồ deployment đầy đủ (12 luồng dữ liệu đánh số, deployable units): **[docs/architecture.md](docs/architecture.md)**.
+
+## Repo Structure
+
+```
+.
+├── docker-compose.yml            # Main stack: minio, postgres, spark×2, kafka, flink×2, airflow
+├── docker/                       # Dockerfile.flink, Dockerfile.airflow (custom images)
+├── generator/                    # Section 01 — Data Generator
+│   ├── config.yaml               #   mọi tham số + seed
+│   ├── offline_generator.py      #   sinh 7 bảng Parquet + 4 lỗi offline
+│   ├── stream_generator.py       #   bắn event Kafka + 3 lỗi streaming
+│   ├── upload_to_landing.py      #   Parquet -> MinIO landing + seed Postgres
+│   └── quality_report.py         #   đo 4 lỗi (Data Quality Report)
+├── processing/
+│   ├── spark/                    # Spark jobs: ingest_bronze, silver_transform, gold_dim/fact,
+│   │                             #   feature_offline, opt_* (tối ưu), validate_bronze, submit.sh
+│   ├── flink/                    # Flink jobs: flink_stream (windowing), flink_to_bronze
+│   ├── warehouse_index.py        # tối ưu index Postgres
+│   ├── validate_gold.py          # validate DP2
+│   └── validate_features.py      # validate DP3
+├── pipelines/airflow/dags/       # 3 DAG (dp1/dp2/dp3) + common.py (helper)
+├── governance/datahub/           # DataHub: recipes ingest, lineage.yml, emit_assertion.py, start script
+├── docs/                         # Tài liệu + ảnh bằng chứng (docs/images/phaseN/)
+├── project_proposal.md           # thiết kế tổng quan + rubric coverage
+├── process.md                    # lộ trình 12 phase
+└── pyproject.toml / uv.lock      # môi trường Python (uv)
+```
+
+## Tech stack
+
+| Layer | Công cụ |
+|-------|---------|
+| Storage | MinIO (S3), Delta Lake, PostgreSQL |
+| Ingestion | Kafka (KRaft), Spark JDBC/S3A |
+| Batch | Apache Spark (cluster) |
+| Streaming | Apache Flink (cluster, PyFlink) |
+| Orchestration | Apache Airflow |
+| Governance | DataHub (lineage + data contract) |
+| Env | Python + `uv`, Docker Compose |
+
+## Data pipelines
+
+| Pipeline | Luồng | Stage | Validate |
+|----------|-------|-------|----------|
+| **DP1** | landing → Bronze (Delta) | ingest → validate | 12/12 PASS |
+| **DP2** | Bronze → Silver → Gold (dim SCD2 + fact + OBT) | ingest → validate | 11/11 PASS |
+| **DP3** | feature `feat_user_90d` (point-in-time) | ingest → validate | 9/9 PASS |
+
+3 lỗi dữ liệu **offline** (skew, high cardinality, schema evolution, duplicate) và **streaming**
+(burst, late/out-of-order, duplicate) đều được cố tình tạo + xử lý có bằng chứng.
+
+## Tài liệu chi tiết (`docs/`)
+
+| Tài liệu | Nội dung |
+|----------|----------|
+| [architecture.md](docs/architecture.md) | Deployment diagram, luồng dữ liệu, deployable units |
+| [data_generator.md](docs/data_generator.md) | Section 01: 7 bảng + 4 lỗi offline + Data Quality Report |
+| [schema_design.md](docs/schema_design.md) | Section 02: Bronze/Silver/Gold, SCD2, ERD, naming, glossary |
+| [spark_optimization.md](docs/spark_optimization.md) | 4 lỗi offline: baseline → optimize + Spark UI |
+| [flink_streaming.md](docs/flink_streaming.md) | Streaming: windowing + watermark + dedup + Flink UI |
+| [storage_optimization.md](docs/storage_optimization.md) | Compaction/Z-ORDER (lakehouse) + index (warehouse) |
+| [orchestration.md](docs/orchestration.md) | Airflow: 3 DAG DP1/DP2/DP3, connections/variables |
+| [governance.md](docs/governance.md) | DataHub: metadata + lineage + data contract |
+| [novel_ideas.md](docs/novel_ideas.md) | Novel ideas + proof (Phase 12) |
+
+## Run instructions
 
 ```bash
+# 1. Môi trường Python
 uv sync
-docker compose up
+
+# 2. Dựng hạ tầng (MinIO, Postgres, Spark, Kafka, Flink, Airflow)
+docker compose up -d
+
+# 3. Sinh dữ liệu + đưa lên landing
+uv run python generator/offline_generator.py
+uv run python generator/upload_to_landing.py
+
+# 4. Chạy pipeline (thủ công, hoặc trigger từ Airflow UI localhost:8083)
+bash processing/spark/submit.sh ingest_bronze.py     # DP1
+# ... hoặc trigger DAG dp1_ingest_bronze / dp2_silver_gold / dp3_feature_offline
+
+# 5. Governance (DataHub — stack riêng)
+bash governance/datahub/start_datahub.sh             # UI localhost:9002
 ```
+
+> UI: MinIO `:9001` · Spark `:8080` · Flink `:8082` · Airflow `:8083` · DataHub `:9002`.
+> Chi tiết Docker + tối ưu image: Phase 12 (xem [process.md](process.md)).

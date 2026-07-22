@@ -269,3 +269,25 @@ có khoảng `[valid_from_ts, valid_to_ts)` **không chồng lấn**.
 | **Delta Lake** | Định dạng bảng trên data lake có ACID, time travel, hỗ trợ schema thay đổi. |
 | **`mergeSchema`** | Đọc nhiều file schema khác nhau → tự gộp schema, cột thiếu = NULL (xử lý schema evolution). |
 | **Bronze / Silver / Gold** | 3 tầng dữ liệu: raw → sạch → mô hình hóa (medallion architecture). |
+
+---
+
+## 13. Schema visualization (Phase 11)
+
+Gold có **PK + FK thật** ở DB ([`processing/add_gold_constraints.py`](../processing/add_gold_constraints.py):
+4 PK dim + 6 FK fact→dim, 0 orphan) → DBeaver vẽ được ERD quan hệ.
+
+![ERD dim-fact](images/phase11/erd-dim-fact.png)
+*ERD star schema (DBeaver): fact_question_attempt & fact_mock_test_result → dim_user/dim_question/dim_test/dim_date.*
+
+### Bảng ở cả 3 zone
+
+| Zone | Bằng chứng |
+|------|-----------|
+| Bronze (Delta/MinIO) | ![Bronze](images/phase11/bronze.png) `raw_*` + `stream_events` |
+| Silver (Delta/MinIO) | ![Silver](images/phase11/silver.png) `stg_*` |
+| Gold (PostgreSQL) | ![Gold](images/phase11/gold.png) `dim_*`/`fact_*`/`obt_*`/`feat_*` |
+
+### Điểm nhấn schema
+- **SCD2** (`dim_user`): ![dim_user SCD2](images/phase6/dim-user-scd2.png) — mỗi user đổi target có 2 dòng (is_current false/true).
+- **Feature point-in-time** (`feat_user_90d`): ![feat_user_90d](images/phase8/feat-user-90d.png) — có `event_timestamp` + `created_ts`.

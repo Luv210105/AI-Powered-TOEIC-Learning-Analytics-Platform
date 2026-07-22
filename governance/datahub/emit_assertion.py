@@ -52,6 +52,7 @@ def emit_assertion(assertion_id, dataset_name, field, operator, aggregation, nat
 
 
 def main():
+    """Emit 2 assertion (data contract) cho dim_user + fact_question_attempt."""
     emit_assertion(
         "dim_user_user_sk_unique", "toeic.public.dim_user", "user_sk",
         models.AssertionStdOperatorClass._NATIVE_, models.AssertionStdAggregationClass.UNIQUE_PROPOTION,
