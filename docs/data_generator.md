@@ -58,3 +58,21 @@ Chạy `uv run python generator/quality_report.py` để đo. Kết quả (seed=
 ![Data Quality Report](images/phase2/data-quality-report.png)
 
 *Kết quả `quality_report.py` — đo 4 lỗi cố tình cài trên dữ liệu offline.*
+
+## 5. Lưu trữ để ingest sau (store → Bronze)
+
+Sau khi sinh, dữ liệu được **đẩy lên nơi lưu trữ** để các pipeline ingest vào Bronze về sau
+(bằng [`upload_to_landing.py`](../generator/upload_to_landing.py)) — mô phỏng data **đang nằm ở
+department/hệ thống khác**:
+
+- **MinIO** (object storage, bucket `landing`): các bảng Parquet offline (nguồn cho **DP1 → Bronze**).
+- **PostgreSQL** (`src_users`, `src_questions`): seed thẳng vào DB nguồn (mô phỏng OLTP department khác,
+  nguồn pull đa nguồn cho Spark).
+
+![MinIO landing files](images/phase3/minio-landing-files.png)
+
+*Bucket `landing` trên MinIO — Parquet offline đã sẵn sàng cho DP1 ingest vào Bronze.*
+
+![Postgres source tables](images/phase3/dbeaver-source-tables.png)
+
+*Bảng nguồn trên PostgreSQL (xem qua DBeaver) — mô phỏng dữ liệu ở hệ thống department khác.*
