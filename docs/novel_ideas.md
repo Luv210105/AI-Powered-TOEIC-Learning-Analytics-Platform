@@ -32,8 +32,7 @@ docker images toeic-app     # naive 2.18GB vs optimized 651MB
 ```
 
 ### Vì sao "novel"
-`uv` (2024+) chưa nằm trong chương trình đào tạo (vốn dùng pip/venv); kết hợp multistage + `--frozen` cho
-build **nhanh, nhỏ, reproducible** — thực hành DevOps/MLOps hiện đại.
+kết hợp multistage + `--frozen` cho build **nhanh, nhỏ, reproducible** — thực hành DevOps/MLOps hiện đại.
 
 ---
 
