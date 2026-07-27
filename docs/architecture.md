@@ -8,7 +8,7 @@ mô tả.
 
 ## 1. Deployment diagram (data flow)
 
-![Data flow diagram](images/architecture_dataflow.svg)
+![Data flow diagram](images/flow.png)
 
 <details>
 <summary>Bản text (Mermaid)</summary>

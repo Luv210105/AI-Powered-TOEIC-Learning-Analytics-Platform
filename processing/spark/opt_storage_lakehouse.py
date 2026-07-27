@@ -41,7 +41,7 @@ def main() -> None:
     t_before = timed_query(spark, "BASELINE")
 
     print("=" * 64 + "\n OPTIMIZE + ZORDER BY (question_id)\n" + "=" * 64)
-    spark.sql(f"OPTIMIZE {TBL} ZORDER BY (question_id)").show(truncate=False)
+    spark.sql(f"OPTIMIZE {TBL} ZORDER BY (question_id)").show(truncate=False) #chạy OPTIMIZE + ZORDER BY
 
     print("=" * 64 + "\n SAU OPTIMIZE\n" + "=" * 64)
     f1 = num_files(spark)
